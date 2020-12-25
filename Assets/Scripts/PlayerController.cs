@@ -13,6 +13,11 @@ public class PlayerController : MonoBehaviour, IDamagable
       
      
      */
+    Animator anim;
+    
+
+
+
     public CharacterDatas playerData;
     Camera cam;
    public int healthOfPlayer;
@@ -34,6 +39,7 @@ public class PlayerController : MonoBehaviour, IDamagable
 
     void Start()
     {
+        anim = transform.GetChild(0).GetComponent<Animator>();
        //state = States.notStarted;
 
        roofs = GameObject.FindGameObjectsWithTag("roof");
@@ -76,6 +82,7 @@ public class PlayerController : MonoBehaviour, IDamagable
     {
         if (Input.GetMouseButtonDown(0))
         {
+            anim.SetBool("isShooting",true);
             Vector3 worldPosition = Cam.ScreenToWorldPoint(new Vector3(
             Input.mousePosition.x,
             Input.mousePosition.y,
@@ -86,6 +93,10 @@ public class PlayerController : MonoBehaviour, IDamagable
 
             GameObject bullet = Instantiate(projectile, transform.position, Quaternion.identity) as GameObject;
             bullet.GetComponent<Rigidbody>().velocity = dir * bulletSpeed;
+        }
+        else
+        {
+            anim.SetBool("isShooting",false);
         }
     }
 

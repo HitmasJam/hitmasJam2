@@ -5,6 +5,11 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour, IDamagable
 {
 
+    Animator anim;
+    public Animator Anim { get { return (anim == null) ? GetComponent<Animator>() : anim; } }
+
+
+
     public CharacterDatas enemyData;
     public float speedEnemy=10;
     public GameObject playerObject;
@@ -33,6 +38,7 @@ public class EnemyController : MonoBehaviour, IDamagable
     void FollowPlayer()
     {
         transform.position = Vector3.Lerp(transform.position,playerObject.transform.position,speedEnemy * Time.deltaTime);
+        //transform.rotation = Quaternion.LookRotation(playerObject.transform.position);
     }
 
 
@@ -66,11 +72,13 @@ public class EnemyController : MonoBehaviour, IDamagable
     public void TakeDamage(int damage)
     {
         healthOfEnemy = healthOfEnemy - damage;
+        //vurulma anim
+        Anim.SetTrigger("hit");
         if (healthOfEnemy<=0)
         {
-
-            //vurulma animasyonu eklenecek
-            //Destroy(this.gameObject,2f);
+            Anim.SetTrigger("die");
+            //ölme anim
+            Destroy(this.gameObject,2f);
             Debug.Log("düşman öldü");
         }
     }

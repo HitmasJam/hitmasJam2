@@ -17,6 +17,7 @@ public class Bullet : MonoBehaviour
             if (obje != null)
             {
                 obje.TakeDamage(1);
+                Destroy(gameObject);
             }
         }
 }
