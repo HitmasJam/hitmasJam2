@@ -17,21 +17,30 @@ public class EnemyController : MonoBehaviour, IDamagable
   public  float radiusOfEnemy;
     float damageCounter = 0;
     public LayerMask playerLayer;
+    bool shouldWalk;
     
     void Start()
     {
+        playerObject = GameObject.Find("Kizak");
+        shouldWalk = false;
         healthOfEnemy = enemyData.health;   
     }
 
  
     void Update()
     {
-        if (PlayerController.state == PlayerController.States.isStopped)
+        HitPlayer();
+        if (PlayerController.state == PlayerController.States.isFiring)
+        {
+            shouldWalk = true;
+
+           
+        }
+        if (shouldWalk)
         {
             FollowPlayer();
-            HitPlayer();
+          
         }
-
 
     }
 
@@ -47,9 +56,12 @@ public class EnemyController : MonoBehaviour, IDamagable
         if( Physics.CheckSphere(transform.position, radiusOfEnemy,playerLayer))
         {
            
+            shouldWalk = false;
+            Anim.SetTrigger("punch");
             damageCounter += Time.deltaTime;
             if (damageCounter>3) {
                 IDamagable obje = playerObject.GetComponent<IDamagable>();
+                Debug.Log("dd");
                 if (obje != null)
                 {
                     obje.TakeDamage(1);

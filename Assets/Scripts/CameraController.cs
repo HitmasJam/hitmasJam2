@@ -28,7 +28,9 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        transform.position = Vector3.Lerp(transform.position, new Vector3(target.position.x, target.position.y + 8f, target.position.z - 11), 0.1f);
-       
+        if (PlayerController.state != PlayerController.States.gameOver)
+        {
+            transform.position = Vector3.Lerp(transform.position, new Vector3(target.position.x, target.position.y + 8f, target.position.z - 11), 0.1f);
+        }
     }
 }

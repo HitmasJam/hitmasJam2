@@ -13,6 +13,10 @@ public class PlayerController : MonoBehaviour, IDamagable
       
      
      */
+
+    [SerializeField]
+    private float dieSpeed = 50f;
+
     Animator anim;
     
 
@@ -24,7 +28,7 @@ public class PlayerController : MonoBehaviour, IDamagable
     public Camera Cam { get { return (cam == null) ? cam = Camera.main : cam; } }
 
     public float movementSpeed=20;
-    public enum States { isStarted, notStarted, isStopped,isMoving,isFiring,isRoofClear}
+    public enum States { isStarted, notStarted, isStopped,isMoving,isFiring,isRoofClear,gameOver}
     public static States state;
 
     public GameObject projectile;
@@ -36,6 +40,19 @@ public class PlayerController : MonoBehaviour, IDamagable
     public LayerMask layerEnemy;
     Vector3 clickPos;
     public Transform bulletPoint;
+
+
+    private void OnEnable()
+    {
+        EventManager.GameOver.AddListener(GameOver);
+    }
+    private void OnDisable()
+    {
+        EventManager.GameOver.AddListener(GameOver);
+        
+    }
+
+
 
     void Start()
     {
@@ -52,6 +69,7 @@ public class PlayerController : MonoBehaviour, IDamagable
    
     void Update()
     {
+        Debug.Log(state);
         // oyun basladı mı eventi gelecek
         Movement();
         CheckState();
@@ -72,7 +90,8 @@ public class PlayerController : MonoBehaviour, IDamagable
         healthOfPlayer = healthOfPlayer - damage;
         if (healthOfPlayer <= 0)
         {
-
+            EventManager.GameOver.Invoke();
+            
             //vurulma animasyonu eklenecek
             //Destroy(this.gameObject, 2f);
             Debug.Log("player öldü");
@@ -109,10 +128,20 @@ public class PlayerController : MonoBehaviour, IDamagable
                 new Vector3(roofs[counter].transform.position.x, roofs[counter].transform.position.y+1f, roofs[counter].transform.position.z - 5f), 0.1f);
             MoveCheck();
         }
-        if (state == States.isStopped) {
+       else if (state == States.isStopped) {
+            StartCoroutine(FiringState());
+           
+        }
+        else if (state==States.isFiring)
+        {
             Shoot();
         }
+        else if (state == States.gameOver)
+        {
+            transform.Translate(Vector3.forward * Time.deltaTime * dieSpeed, Space.World);
+        }
     }
+   
 
     void MoveCheck()
     {
@@ -121,5 +150,19 @@ public class PlayerController : MonoBehaviour, IDamagable
             Debug.Log("stopped");
             state = States.isStopped;
         }
+    } 
+    void GameOver()
+    {
+        state = States.gameOver;
+    }
+    
+    
+    
+    
+    
+    IEnumerator FiringState()
+    {
+        yield return new WaitForEndOfFrame();
+        state = States.isFiring;
     }
 }
