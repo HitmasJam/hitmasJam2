@@ -4,21 +4,19 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour, IDamagable
 {
-
     public CharacterDatas enemyData;
-    public float speedEnemy=10;
+    public float speedEnemy = 10;
     public GameObject playerObject;
     int healthOfEnemy;
-  public  float radiusOfEnemy;
+    public float radiusOfEnemy;
     float damageCounter = 0;
     public LayerMask playerLayer;
-    
+
     void Start()
     {
-        healthOfEnemy = enemyData.health;   
+        healthOfEnemy = enemyData.health;
     }
 
- 
     void Update()
     {
         if (PlayerController.state == PlayerController.States.isStopped)
@@ -26,24 +24,23 @@ public class EnemyController : MonoBehaviour, IDamagable
             FollowPlayer();
             HitPlayer();
         }
-
-
     }
 
     void FollowPlayer()
     {
-        transform.position = Vector3.Lerp(transform.position,playerObject.transform.position,speedEnemy * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, playerObject.transform.position, speedEnemy * Time.deltaTime);
     }
-
 
     void HitPlayer()
     {
-        if( Physics.CheckSphere(transform.position, radiusOfEnemy,playerLayer))
+        if (Physics.CheckSphere(transform.position, radiusOfEnemy, playerLayer))
         {
-           
             damageCounter += Time.deltaTime;
-            if (damageCounter>3) {
+
+            if (damageCounter > 3)
+            {
                 IDamagable obje = playerObject.GetComponent<IDamagable>();
+
                 if (obje != null)
                 {
                     obje.TakeDamage(1);
@@ -52,7 +49,7 @@ public class EnemyController : MonoBehaviour, IDamagable
             }
             //vurma animasyonu
         }
-       
+
     }
 
     public void OnDrawGizmos()
@@ -61,17 +58,16 @@ public class EnemyController : MonoBehaviour, IDamagable
         Gizmos.DrawSphere(transform.position, radiusOfEnemy);
     }
 
-
-
     public void TakeDamage(int damage)
     {
         healthOfEnemy = healthOfEnemy - damage;
-        if (healthOfEnemy<=0)
+        if (healthOfEnemy <= 0)
         {
-
             //vurulma animasyonu eklenecek
-            //Destroy(this.gameObject,2f);
+            Destroy(this.gameObject);
             Debug.Log("düşman öldü");
+            PlayerController.state = PlayerController.States.isRoofClear;
+
         }
     }
 

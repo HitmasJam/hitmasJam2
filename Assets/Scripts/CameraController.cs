@@ -19,7 +19,7 @@ public class CameraController : MonoBehaviour
     }
 
     void OnGUI()
-    {
+    { 
         int size = 12;
         float posX = _camera.pixelWidth / 2 - size / 4;
         float posY = _camera.pixelHeight / 2 - size / 2;

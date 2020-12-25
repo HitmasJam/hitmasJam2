@@ -23,6 +23,9 @@ public class PlayerController : MonoBehaviour, IDamagable
     public static States state;
 
     public GameObject projectile;
+
+    public GameObject confetti;
+
     public float bulletSpeed;
     public GameObject enemy;
 
@@ -43,6 +46,7 @@ public class PlayerController : MonoBehaviour, IDamagable
         healthOfPlayer = playerData.health;
 
     }
+
    
     void Update()
     {
@@ -91,15 +95,21 @@ public class PlayerController : MonoBehaviour, IDamagable
 
     void CheckState()
     {
-        if (state == States.isMoving)
+        if (state == States.isMoving && counter < roofs.Length)
         {
 
             transform.position = Vector3.MoveTowards(transform.position,
                 new Vector3(roofs[counter].transform.position.x, roofs[counter].transform.position.y+1f, roofs[counter].transform.position.z - 5f), 0.1f);
             MoveCheck();
         }
+        
         if (state == States.isStopped) {
             Shoot();
+        }
+
+        if (counter == roofs.Length - 1)
+        {
+            confetti.SetActive(true);
         }
     }
 
