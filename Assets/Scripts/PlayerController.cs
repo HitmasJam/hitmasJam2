@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+
 
 public class PlayerController : MonoBehaviour, IDamagable
 {
@@ -18,25 +18,28 @@ public class PlayerController : MonoBehaviour, IDamagable
     private float dieSpeed = 50f;
 
     Animator anim;
-    
 
+    GameObject droppedGift;
 
 
     public CharacterDatas playerData;
     Camera cam;
-   public int healthOfPlayer;
+    public int healthOfPlayer;
     public Camera Cam { get { return (cam == null) ? cam = Camera.main : cam; } }
 
-    public float movementSpeed=20;
-    public enum States { isStarted, notStarted, isStopped,isMoving,isFiring,isRoofClear,gameOver}
+    public float movementSpeed = 20;
+    public enum States { isStarted, notStarted, onRoof, isStopped, isMoving, isFiring, isRoofClear, gameOver, droppingGift }
     public static States state;
 
     public GameObject projectile;
     public float bulletSpeed;
     public GameObject enemy;
 
-    public GameObject[] roofs;
-    int counter = 0;
+    public List<GameObject> giftBoxes = new List<GameObject>();
+
+
+
+    int roofCounter = 0;
     public LayerMask layerEnemy;
     Vector3 clickPos;
     public Transform bulletPoint;
@@ -44,12 +47,20 @@ public class PlayerController : MonoBehaviour, IDamagable
 
     private void OnEnable()
     {
-        EventManager.GameOver.AddListener(GameOver);
+        EventManager.OnGameStart.AddListener(GameStart);
+        EventManager.OnGameOver.AddListener(GameOver);
+        EventManager.OnRoof.AddListener(OnRoofState);
+        EventManager.OnRoofClear.AddListener(RoofClear);
+        EventManager.OnDropGift.AddListener(DropGift);
     }
     private void OnDisable()
     {
-        EventManager.GameOver.AddListener(GameOver);
-        
+        EventManager.OnGameOver.RemoveListener(GameStart);
+        EventManager.OnGameOver.RemoveListener(GameOver);
+        EventManager.OnRoof.RemoveListener(OnRoofState);
+        EventManager.OnRoofClear.RemoveListener(RoofClear);
+        EventManager.OnDropGift.RemoveListener(DropGift);
+
     }
 
 
@@ -57,16 +68,14 @@ public class PlayerController : MonoBehaviour, IDamagable
     void Start()
     {
         anim = transform.GetChild(0).GetComponent<Animator>();
-       //state = States.notStarted;
+        //state = States.notStarted;
 
-       roofs = GameObject.FindGameObjectsWithTag("roof");
 
-       roofs = roofs.OrderBy((d) => (d.transform.position - transform.position).sqrMagnitude).ToArray();
 
         healthOfPlayer = playerData.health;
 
     }
-   
+
     void Update()
     {
         Debug.Log(state);
@@ -77,11 +86,12 @@ public class PlayerController : MonoBehaviour, IDamagable
 
     void Movement()
     {
-        if (state == States.isRoofClear || state == States.isStarted) {
+        if (state == States.isRoofClear || state == States.isStarted)
+        {
             if (Input.GetMouseButtonDown(0))
             {
-                    state = States.isMoving;
-                    counter++;
+                state = States.isMoving;
+
             }
         }
     }
@@ -90,8 +100,8 @@ public class PlayerController : MonoBehaviour, IDamagable
         healthOfPlayer = healthOfPlayer - damage;
         if (healthOfPlayer <= 0)
         {
-            EventManager.GameOver.Invoke();
-            
+            EventManager.OnGameOver.Invoke();
+
             //vurulma animasyonu eklenecek
             //Destroy(this.gameObject, 2f);
             Debug.Log("player öldü");
@@ -101,11 +111,11 @@ public class PlayerController : MonoBehaviour, IDamagable
     {
         if (Input.GetMouseButtonDown(0))
         {
-            anim.SetBool("isShooting",true);
+            anim.SetBool("isShooting", true);
             Vector3 worldPosition = Cam.ScreenToWorldPoint(new Vector3(
             Input.mousePosition.x,
             Input.mousePosition.y,
-            -Cam.transform.position.z + transform.position.z+10));
+            -Cam.transform.position.z + transform.position.z + 10));
 
             Vector3 dir = worldPosition - (new Vector3(transform.position.x, transform.position.y, transform.position.z));
             dir.Normalize();
@@ -115,7 +125,7 @@ public class PlayerController : MonoBehaviour, IDamagable
         }
         else
         {
-            anim.SetBool("isShooting",false);
+            anim.SetBool("isShooting", false);
         }
     }
 
@@ -125,41 +135,119 @@ public class PlayerController : MonoBehaviour, IDamagable
         {
 
             transform.position = Vector3.MoveTowards(transform.position,
-                new Vector3(roofs[counter].transform.position.x, roofs[counter].transform.position.y+1f, roofs[counter].transform.position.z - 5f), 0.1f);
+                new Vector3(GameManager.Instance.roofs[roofCounter].transform.position.x,
+                GameManager.Instance.roofs[roofCounter].transform.position.y + 1f, GameManager.Instance.roofs[roofCounter].transform.position.z - 5f), 0.075f);
             MoveCheck();
         }
-       else if (state == States.isStopped) {
+        else if (state == States.isStopped)
+        {
             StartCoroutine(FiringState());
-           
+
         }
-        else if (state==States.isFiring)
+        else if (state == States.onRoof)
         {
             Shoot();
         }
         else if (state == States.gameOver)
         {
+            Debug.Log("sds");
             transform.Translate(Vector3.forward * Time.deltaTime * dieSpeed, Space.World);
         }
+        else if (state == States.isRoofClear)
+        {
+            transform.position = Vector3.MoveTowards(transform.position,
+                new Vector3(GameManager.Instance.flues[roofCounter].transform.position.x, GameManager.Instance.flues[roofCounter].transform.position.y + 5f,
+                GameManager.Instance.flues[roofCounter].transform.position.z), 0.1f);
+            if (transform.position.x == GameManager.Instance.flues[roofCounter].transform.position.x)
+            {
+                EventManager.OnDropGift.Invoke();
+
+            }
+        }
+        else if (state == States.droppingGift)
+        {
+
+        }
     }
-   
+
 
     void MoveCheck()
     {
-        if (transform.position.z == (roofs[counter].transform.position.z -5f))
+        //çatıya ulaşma durumu
+        if (transform.position.z == (GameManager.Instance.roofs[roofCounter].transform.position.z - 5f))
         {
-            Debug.Log("stopped");
-            state = States.isStopped;
+
+            EventManager.OnRoof.Invoke();
+            //hediye atınca arttır
+            //roofCounter++;
         }
-    } 
+    }
+
+
+    void GameStart()
+    {
+        state = States.isMoving;
+    }
+
+
+
+
+
+
+
+    void OnRoofState()
+    {
+        state = States.onRoof;
+    }
+
+    void RoofClear()
+    {
+        state = States.isRoofClear;
+    }
+
+
+    void DropGift()
+    {
+        droppedGift = Instantiate(giftBoxes[Random.Range(0, 5)], transform.position, Quaternion.identity);
+        
+       
+        state = States.droppingGift;
+       
+        if (roofCounter != GameManager.Instance.roofs.Length-1)
+        {
+            StartCoroutine(WaitGiftDrop());
+            roofCounter++;
+        }
+        else
+        {
+            EventManager.OnLevelFinish.Invoke();
+        }
+    }
+
+
+
+
+
+
     void GameOver()
     {
         state = States.gameOver;
     }
-    
-    
-    
-    
-    
+
+
+
+
+    IEnumerator WaitGiftDrop()
+    {
+        yield return new WaitForSeconds(1.15f);
+
+            state = States.isMoving;
+        
+        yield return new WaitForSeconds(2);
+        Destroy(droppedGift);
+
+    }
+
     IEnumerator FiringState()
     {
         yield return new WaitForEndOfFrame();
