@@ -18,12 +18,12 @@ public class EnemyController : MonoBehaviour, IDamagable
     float damageCounter = 0;
     public LayerMask playerLayer;
     bool shouldWalk;
+    bool isDead;
     
     void Start()
     {
         playerObject = GameObject.Find("Kizak");
         shouldWalk = false;
-        healthOfEnemy = enemyData.health;   
     }
 
  
@@ -33,13 +33,10 @@ public class EnemyController : MonoBehaviour, IDamagable
         if (PlayerController.state == PlayerController.States.isFiring)
         {
             shouldWalk = true;
-
-           
         }
-        if (shouldWalk)
+        if (shouldWalk && !isDead)
         {
-            FollowPlayer();
-          
+            FollowPlayer(); 
         }
 
     }
@@ -90,7 +87,8 @@ public class EnemyController : MonoBehaviour, IDamagable
         {
             Anim.SetTrigger("die");
             //ölme anim
-            Destroy(this.gameObject,2f);
+            //Destroy(this.gameObject,2f);
+            isDead = true;
             Debug.Log("düşman öldü");
         }
     }

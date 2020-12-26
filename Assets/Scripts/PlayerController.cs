@@ -28,14 +28,17 @@ public class PlayerController : MonoBehaviour, IDamagable
     public Camera Cam { get { return (cam == null) ? cam = Camera.main : cam; } }
 
     public float movementSpeed=20;
-    public enum States { isStarted, notStarted, isStopped,isMoving,isFiring,isRoofClear,gameOver}
+    public enum States { isStarted, notStarted, isStopped,isMoving,isFiring,isRoofClear,isGiftDropped, gameOver}
     public static States state;
 
     public GameObject projectile;
+    public GameObject gift;
     public float bulletSpeed;
     public GameObject enemy;
 
     public GameObject[] roofs;
+    public GameObject[] flues;
+    public GameObject[] boxes;
     int counter = 0;
     public LayerMask layerEnemy;
     Vector3 clickPos;
@@ -60,8 +63,10 @@ public class PlayerController : MonoBehaviour, IDamagable
        //state = States.notStarted;
 
        roofs = GameObject.FindGameObjectsWithTag("roof");
+       flues = GameObject.FindGameObjectsWithTag("flues");
 
-       roofs = roofs.OrderBy((d) => (d.transform.position - transform.position).sqrMagnitude).ToArray();
+        flues = flues.OrderBy((d) => (d.transform.position - transform.position).sqrMagnitude).ToArray();
+        roofs = roofs.OrderBy((d) => (d.transform.position - transform.position).sqrMagnitude).ToArray();
 
         healthOfPlayer = playerData.health;
 
@@ -77,7 +82,7 @@ public class PlayerController : MonoBehaviour, IDamagable
 
     void Movement()
     {
-        if (state == States.isRoofClear || state == States.isStarted) {
+        if (state == States.isGiftDropped || state == States.isStarted) {
             if (Input.GetMouseButtonDown(0))
             {
                     state = States.isMoving;
@@ -123,7 +128,6 @@ public class PlayerController : MonoBehaviour, IDamagable
     {
         if (state == States.isMoving)
         {
-
             transform.position = Vector3.MoveTowards(transform.position,
                 new Vector3(roofs[counter].transform.position.x, roofs[counter].transform.position.y+1f, roofs[counter].transform.position.z - 5f), 0.1f);
             MoveCheck();
@@ -140,8 +144,17 @@ public class PlayerController : MonoBehaviour, IDamagable
         {
             transform.Translate(Vector3.forward * Time.deltaTime * dieSpeed, Space.World);
         }
+        else if(state == States.isRoofClear)
+        {
+            transform.position = Vector3.MoveTowards(transform.position,
+                new Vector3(flues[counter].transform.position.x, flues[counter].transform.position.y + 5f, flues[counter].transform.position.z), 0.1f);
+        }
     }
    
+    void DropGift()
+    {
+        GameObject gift = Instantiate(boxes[Random.Range(0, 5)], transform.position, Quaternion.identity);
+    }
 
     void MoveCheck()
     {
@@ -155,10 +168,6 @@ public class PlayerController : MonoBehaviour, IDamagable
     {
         state = States.gameOver;
     }
-    
-    
-    
-    
     
     IEnumerator FiringState()
     {
