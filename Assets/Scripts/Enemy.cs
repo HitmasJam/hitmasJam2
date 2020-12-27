@@ -99,9 +99,9 @@ public class Enemy : MonoBehaviour, IDamagable
             
         }
     }
-
-
-
-    
+    private void OnTriggerEnter(Collider other)
+    {
+        other.GetComponent<PlayerController>().TakeDamage(1);
+    }
 
 }
