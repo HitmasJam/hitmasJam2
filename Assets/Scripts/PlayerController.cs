@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour, IDamagable
     public CharacterDatas playerData;
     Camera cam;
     public int healthOfPlayer;
+    public HealthBar healthBar;
     public Camera Cam { get { return (cam == null) ? cam = Camera.main : cam; } }
 
     public float movementSpeed = 20;
@@ -73,6 +74,7 @@ public class PlayerController : MonoBehaviour, IDamagable
 
 
         healthOfPlayer = playerData.health;
+        healthBar.SetMaxHealth(playerData.health);
 
     }
 
@@ -98,6 +100,7 @@ public class PlayerController : MonoBehaviour, IDamagable
     public void TakeDamage(int damage)
     {
         healthOfPlayer = healthOfPlayer - damage;
+        healthBar.SetHealth(healthOfPlayer);
         if (healthOfPlayer <= 0)
         {
             EventManager.OnGameOver.Invoke();
