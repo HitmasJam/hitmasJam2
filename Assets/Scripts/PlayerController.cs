@@ -92,7 +92,7 @@ public class PlayerController : MonoBehaviour, IDamagable
         {
             EventManager.OnGameOver.Invoke();
 
-            //vurulma animasyonu eklenecek
+            
             //Destroy(this.gameObject, 2f);
             Debug.Log("player öldü");
         }
@@ -140,7 +140,7 @@ public class PlayerController : MonoBehaviour, IDamagable
         }
         else if (state == States.gameOver)
         {
-            Debug.Log("sds");
+            
             transform.Translate(Vector3.forward * Time.deltaTime * dieSpeed, Space.World);
         }
         else if (state == States.isRoofClear)
