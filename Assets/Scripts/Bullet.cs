@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-
+    public GameObject bulletParticle;
     private void Start()
     {
         StartCoroutine(DestroyBullet()) ;
@@ -20,6 +20,7 @@ public class Bullet : MonoBehaviour
             IDamagable obje = other.GetComponent<IDamagable>();
             if (obje != null)
             {
+                Instantiate(bulletParticle,transform.position,Quaternion.identity);
                 obje.TakeDamage(1);
                 Destroy(gameObject);
             }
