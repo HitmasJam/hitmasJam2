@@ -6,5 +6,6 @@ using UnityEngine;
 public class CharacterDatas : ScriptableObject
 {
     public int health;
+    public float speed;
 
 }

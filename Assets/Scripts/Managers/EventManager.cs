@@ -13,6 +13,9 @@ public class EventManager : MonoBehaviour
     public static UnityEvent OnDropGift = new UnityEvent();
     public static UnityEvent OnRoofClear = new UnityEvent();
     public static UnityEvent OnEnemyDie = new UnityEvent();
+    public static UnityEvent OnEnemyHit = new UnityEvent();
+    public static UnityEvent OnPlayerHit = new UnityEvent();
+
 
 
 }

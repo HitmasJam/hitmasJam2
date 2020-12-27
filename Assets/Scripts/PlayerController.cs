@@ -71,7 +71,7 @@ public class PlayerController : MonoBehaviour, IDamagable
         anim = transform.GetChild(0).GetComponent<Animator>();
         //state = States.notStarted;
 
-
+        state = States.notStarted;
 
         healthOfPlayer = playerData.health;
         healthBar.SetMaxHealth(playerData.health);
@@ -126,10 +126,10 @@ public class PlayerController : MonoBehaviour, IDamagable
     {
         if (state == States.isMoving)
         {
-
+            
             transform.position = Vector3.MoveTowards(transform.position,
-                new Vector3(GameManager.Instance.roofs[roofCounter].transform.position.x,
-                GameManager.Instance.roofs[roofCounter].transform.position.y + 1f, GameManager.Instance.roofs[roofCounter].transform.position.z - 5f), 0.075f);
+                new Vector3(GameManager.manager.roofs[roofCounter].transform.position.x,
+                GameManager.manager.roofs[roofCounter].transform.position.y + 1f, GameManager.manager.roofs[roofCounter].transform.position.z - 5f), 0.075f);
             MoveCheck();
         }
         else if (state == States.isStopped)
@@ -149,9 +149,9 @@ public class PlayerController : MonoBehaviour, IDamagable
         else if (state == States.isRoofClear)
         {
             transform.position = Vector3.MoveTowards(transform.position,
-                new Vector3(GameManager.Instance.flues[roofCounter].transform.position.x, GameManager.Instance.flues[roofCounter].transform.position.y + 5f,
-                GameManager.Instance.flues[roofCounter].transform.position.z), 0.1f);
-            if (transform.position.x == GameManager.Instance.flues[roofCounter].transform.position.x)
+                new Vector3(GameManager.manager.flues[roofCounter].transform.position.x, GameManager.manager.flues[roofCounter].transform.position.y + 5f,
+                GameManager.manager.flues[roofCounter].transform.position.z), 0.1f);
+            if (transform.position.x == GameManager.manager.flues[roofCounter].transform.position.x)
             {
                 EventManager.OnDropGift.Invoke();
 
@@ -167,7 +167,7 @@ public class PlayerController : MonoBehaviour, IDamagable
     void MoveCheck()
     {
         //çatıya ulaşma durumu
-        if (transform.position.z == (GameManager.Instance.roofs[roofCounter].transform.position.z - 5f))
+        if (transform.position.z == (GameManager.manager.roofs[roofCounter].transform.position.z - 5f))
         {
 
             EventManager.OnRoof.Invoke();
@@ -205,16 +205,14 @@ public class PlayerController : MonoBehaviour, IDamagable
         
        
         state = States.droppingGift;
-       
-        if (roofCounter != GameManager.Instance.roofs.Length-1)
-        {
+     
             StartCoroutine(WaitGiftDrop());
+        if (GameManager.shouldCount) {
             roofCounter++;
         }
-        else
-        {
-            EventManager.OnLevelFinish.Invoke();
-        }
+       
+       
+       
     }
 
 

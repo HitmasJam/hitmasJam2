@@ -21,14 +21,15 @@ public class Enemy : MonoBehaviour, IDamagable
     
     void Start()
     {
-        EnemyManager.Instance.AddEnemy(this);
+        EnemyManager.manager.AddEnemy(this);
         playerObject = GameObject.Find("Kizak");
         shouldWalk = true;
-        healthOfEnemy = enemyData.health;   
+        healthOfEnemy = enemyData.health;
+        speedEnemy = enemyData.speed;
     }
     void OnDestroy()
     {
-        EnemyManager.Instance.RemoveEnemy(this);
+        EnemyManager.manager.RemoveEnemy(this);
        
     }
  
@@ -63,10 +64,12 @@ public class Enemy : MonoBehaviour, IDamagable
             Anim.SetTrigger("punch");
             damageroofCounter += Time.deltaTime;
             if (damageroofCounter>3) {
+
                 IDamagable obje = playerObject.GetComponent<IDamagable>();
                 Debug.Log("dd");
                 if (obje != null)
                 {
+                    EventManager.OnEnemyHit.Invoke();
                     obje.TakeDamage(1);
                 }
                 damageroofCounter = 0;
@@ -86,6 +89,7 @@ public class Enemy : MonoBehaviour, IDamagable
 
     public void TakeDamage(int damage)
     {
+       
         healthOfEnemy = healthOfEnemy - damage;
         //vurulma anim
         Anim.SetTrigger("hit");
@@ -94,14 +98,11 @@ public class Enemy : MonoBehaviour, IDamagable
             Anim.SetTrigger("die");
             //ölme anim
             Destroy(this.gameObject,2f);
-            Debug.Log("düşman öldü");
+
             //EventManager.OnEnemyDie.Invoke();
             
         }
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        other.GetComponent<PlayerController>().TakeDamage(1);
-    }
+   
 
 }

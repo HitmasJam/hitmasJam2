@@ -17,6 +17,7 @@ public class Bullet : MonoBehaviour
     {
         if (other.gameObject.CompareTag("enemy"))
         {
+            EventManager.OnPlayerHit.Invoke();
             IDamagable obje = other.GetComponent<IDamagable>();
             if (obje != null)
             {
