@@ -78,23 +78,13 @@ public class PlayerController : MonoBehaviour, IDamagable
 
     void Update()
     {
-        Debug.Log(state);
+       
         // oyun basladı mı eventi gelecek
-        Movement();
+       
         CheckState();
     }
 
-    void Movement()
-    {
-        if (state == States.isRoofClear || state == States.isStarted)
-        {
-            if (Input.GetMouseButtonDown(0))
-            {
-                state = States.isMoving;
-
-            }
-        }
-    }
+   
     public void TakeDamage(int damage)
     {
         healthOfPlayer = healthOfPlayer - damage;
